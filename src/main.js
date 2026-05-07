@@ -9,8 +9,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 import * as dat from 'dat.gui'
 
-//create instance of WEBGL renderer - a tool three.js uses to alocate a space on a webpage where we can add and animate all 3D stuff
+//The CubeTextureLoader is designed to build a 3D environment skybox (a cube map) and strictly requires
+//all 6 face images provided in its array to be perfect squares (e.g., 512x512, 1024x1024) 
+//and all identical in size.
+import stars from './img/stars_sq.jpg'
+import purple from './img/purple_sq.jpg'
 
+//create instance of WEBGL renderer - a tool three.js uses to alocate a space on a webpage where we can add and animate all 3D stuff
 const renderer = new THREE.WebGLRenderer()
 //enable shadow map
 renderer.shadowMap.enabled = true
@@ -125,15 +130,18 @@ scene.add(ambientLight)
 //add directional light to the scene
 //directional light is a light that is emitted from a single direction
 //it is a light that is directional
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
-scene.add(directionalLight)
-directionalLight.position.set(-30, 50, 0)
+
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+// scene.add(directionalLight)
+// directionalLight.position.set(-30, 50, 0)
+
 //enable shadow map for directional light
-directionalLight.castShadow = true
-directionalLight.shadow.camera.bottom = -12
-directionalLight.shadow.camera.top = 12
-directionalLight.shadow.camera.left = -12
-directionalLight.shadow.camera.right = 12
+
+// directionalLight.castShadow = true
+// directionalLight.shadow.camera.bottom = -12
+// directionalLight.shadow.camera.top = 12
+// directionalLight.shadow.camera.left = -12
+// directionalLight.shadow.camera.right = 12
 // directionalLight.shadow.camera.near = 0.1
 // directionalLight.shadow.camera.far = 100
 
@@ -141,25 +149,107 @@ directionalLight.shadow.camera.right = 12
 //add directional light helper to the scene
 //directional light helper is a helper to see the directional light
 //it is a helper to see the direction of the light
-const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5)
-scene.add(dLightHelper)
+// const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5)
+// scene.add(dLightHelper)
 
 //add shadow helper to the scene
-const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
-scene.add(dLightShadowHelper)
+// const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+// scene.add(dLightShadowHelper)
 
 
 //add point light to the scene
 //point light is a light that is emitted from a single point
 //it is a light that is directional
-const pointLight = new THREE.PointLight(0xffffff, 0.5)
-scene.add(pointLight)
+// const pointLight = new THREE.PointLight(0xffffff, 0.5)
+// scene.add(pointLight)
 
 //add spotlight to the scene
 //spotlight is a light that is emitted from a single point
 //it is a light that is directional
-const spotlight = new THREE.SpotLight(0xffffff, 0.5)
-scene.add(spotlight)
+const spotLight = new THREE.SpotLight(0xFFFFFF)
+scene.add(spotLight)
+spotLight.position.set(-100, 100, 0)
+
+//enable shadow map for spotlight
+//this will make the spotlight to cast shadow
+spotLight.castShadow = true
+
+//set the angle of the spotlight
+// angle is the size of the cone
+spotLight.angle = 0.2
+
+//set the penumbra of the spotlight
+// penumbra is the fuzziness of the shadow- progressive blur effect to the edges of the spotlight shadow
+// spotLight.penumbra = 0
+
+//set the intensity of the spotlight
+// intensity is the brightness of the spotlight
+// In newer versions of Three.js (v155+), lights are physically correct by default.
+// This means their brightness decays over distance quadratically. 
+// For example, 1 (which represents 1 candela) was so dim it appeared to be completely off.
+// spotLight.intensity = 10000
+
+const sLightHelper = new THREE.SpotLightHelper(spotLight)
+scene.add(sLightHelper)
+
+//add fog to the scene
+//fog is a way to make the scene look more realistic
+//it is a way to make the scene look more distant
+// scene.fog = new THREE.Fog(0xFFFFFF, 0, 200)
+
+// FogExp2 is similar to fog but it is exponential
+// The second parameter is the density of the fog
+// The higher the density, the more the fog will obscure the scene
+// scene.fog = new THREE.FogExp2(0xFFFFFF, 0.01)
+
+//set the clear color of the renderer
+//this will clear the renderer with the specified color
+// renderer.setClearColor(0xFFEA00)
+
+
+const textureLoader = new THREE.TextureLoader()
+// const texture = textureLoader.load(stars)
+// scene.background = texture
+
+//import cubemap textures from the folder ./img
+//Positive X, Negative X, Positive Y, Negative Y, Positive Z, Negative Z
+//Positive X-Right, Negative X-Left, Positive Y-Top, Negative Y-Bottom, Positive Z-Front, Negative Z-Back
+const cubeTextureLoader = new THREE.CubeTextureLoader()
+scene.background = cubeTextureLoader.load([
+    purple,
+    purple,
+    stars,
+    stars,
+    stars,
+    stars
+])
+
+const box2Geometry = new THREE.BoxGeometry(4, 4, 4)
+const box2Material = new THREE.MeshBasicMaterial({
+    // color: 0x00ff00,
+    // map: textureLoader.load(purple)
+})
+
+//define an array of materials
+//it will be used to create a box with different materials on each face
+//order of materials: Right, Left, Top, Bottom, Front, Back
+const box2MultiMaterial = [
+    new THREE.MeshBasicMaterial({ map: textureLoader.load(purple) }),
+    new THREE.MeshBasicMaterial({ map: textureLoader.load(purple) }),
+    new THREE.MeshBasicMaterial({ map: textureLoader.load(stars) }),
+    new THREE.MeshBasicMaterial({ map: textureLoader.load(stars) }),
+    new THREE.MeshBasicMaterial({ map: textureLoader.load(stars) }),
+    new THREE.MeshBasicMaterial({ map: textureLoader.load(stars) })
+]
+// const box2 = new THREE.Mesh(box2Geometry, box2Material)
+const box2 = new THREE.Mesh(box2Geometry, box2MultiMaterial)
+scene.add(box2)
+
+box2.position.set(0, 15, 10)
+
+//box2.material is an array of materials
+//so we can set the map for each material
+// box2.material.map = textureLoader.load(purple)
 
 const gui = new dat.GUI()
 
@@ -177,6 +267,9 @@ const options = {
     sphereColor: '#ffea00',
     wireframe: false,
     speed: 0.01,
+    angle: 0.2,
+    penumbra: 0,
+    intensity: 10000
 }
 
 //add color picker to the GUI
@@ -206,6 +299,10 @@ gui.add(options, 'wireframe')
 //the third parameter is the minimum value
 //the fourth parameter is the maximum value
 gui.add(options, 'speed', 0, 0.1)
+gui.add(options, 'angle', 0, 1)
+gui.add(options, 'penumbra', 0, 1)
+gui.add(options, 'intensity', 0, 50000)
+
 
 //create variable to control the animation of the sphere
 let step = 0
@@ -226,6 +323,15 @@ function animate() {
     // step += speed
     step += options.speed
     sphere.position.y = 10 * Math.abs(Math.sin(step))
+
+    //change the angle of the spotlight
+    spotLight.angle = options.angle
+    //change the penumbra of the spotlight
+    spotLight.penumbra = options.penumbra
+    //change the intensity of the spotlight
+    spotLight.intensity = options.intensity
+    //update the spotlight helper
+    sLightHelper.update()
 
     //render the scene 
     renderer.render(scene, camera)
