@@ -12,6 +12,8 @@ import * as dat from 'dat.gui'
 //create instance of WEBGL renderer - a tool three.js uses to alocate a space on a webpage where we can add and animate all 3D stuff
 
 const renderer = new THREE.WebGLRenderer()
+//enable shadow map
+renderer.shadowMap.enabled = true
 
 //here i want that space to
 //take all over the page by using the
@@ -62,7 +64,7 @@ scene.add(box)
 const planeGeometry = new THREE.PlaneGeometry(30, 30)
 //add side: THREE.DoubleSide to the plane material
 //this will make the plane visible from both sides
-const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })
+const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide })
 const plane = new THREE.Mesh(planeGeometry, planeMaterial)
 //add the plane to the scene
 scene.add(plane)
@@ -71,13 +73,14 @@ scene.add(plane)
 //it should be flat on xz axis
 plane.rotation.x = -0.5 * Math.PI
 
+plane.receiveShadow = true
 
 //add a grid helper to the scene
 //grid helper is a grid that is displayed on the scene
 //it is a helper to see the scene
-const gridHelper = new THREE.GridHelper(30)
+// const gridHelper = new THREE.GridHelper(30)
 //add grid helper to the scene
-scene.add(gridHelper)
+// scene.add(gridHelper)
 
 //create a sphere
 //a sphere is defined by its radius
@@ -99,7 +102,7 @@ const sphereGeometry = new THREE.SphereGeometry(4, 32, 32)
 // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true })
 
 
-const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false })
+const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff, wireframe: false })
 
 // MeshStandardMaterial uses the light - here it will appear black if no light source is added to the scene
 // const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff, wireframe: false })
@@ -109,6 +112,54 @@ const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
 scene.add(sphere)
 
 sphere.position.set(0, 4, 0)
+//enable shadow map for sphere
+//this will make the sphere to cast shadow
+sphere.castShadow = true
+
+//add ambient light to the scene
+//ambient light is a light that is emitted from all directions
+//it is a light that is not directional
+const ambientLight = new THREE.AmbientLight(0x333333)
+scene.add(ambientLight)
+
+//add directional light to the scene
+//directional light is a light that is emitted from a single direction
+//it is a light that is directional
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+scene.add(directionalLight)
+directionalLight.position.set(-30, 50, 0)
+//enable shadow map for directional light
+directionalLight.castShadow = true
+directionalLight.shadow.camera.bottom = -12
+directionalLight.shadow.camera.top = 12
+directionalLight.shadow.camera.left = -12
+directionalLight.shadow.camera.right = 12
+// directionalLight.shadow.camera.near = 0.1
+// directionalLight.shadow.camera.far = 100
+
+
+//add directional light helper to the scene
+//directional light helper is a helper to see the directional light
+//it is a helper to see the direction of the light
+const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5)
+scene.add(dLightHelper)
+
+//add shadow helper to the scene
+const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+scene.add(dLightShadowHelper)
+
+
+//add point light to the scene
+//point light is a light that is emitted from a single point
+//it is a light that is directional
+const pointLight = new THREE.PointLight(0xffffff, 0.5)
+scene.add(pointLight)
+
+//add spotlight to the scene
+//spotlight is a light that is emitted from a single point
+//it is a light that is directional
+const spotlight = new THREE.SpotLight(0xffffff, 0.5)
+scene.add(spotlight)
 
 const gui = new dat.GUI()
 
