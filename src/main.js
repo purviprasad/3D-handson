@@ -307,7 +307,45 @@ gui.add(options, 'intensity', 0, 50000)
 //create variable to control the animation of the sphere
 let step = 0
 //to control the speed of the animation
-let speed = 0.01
+// let speed = 0.01
+
+//create a 2d vector in which we are going to put
+//the x and y values of the cursor position the second step is to add an event
+//listener to catch the position of the cursor
+const mousePosition = new THREE.Vector2(2, 2)
+let isPointerOverCanvas = false
+const sphereDefaultColor = sphere.material.color.clone()
+
+//when the mouse moves over the canvas
+//set the isPointerOverCanvas to true
+//update the mousePosition vector with the normalized values of the cursor's coordinates e 
+// client x is the value of the x position of the cursor
+// window inner width is the width of the window thus the width of the canvas
+// e client y is the value of the y position of the cursor and window inner height is the height of the window thus the height of the canvas
+
+renderer.domElement.addEventListener('mousemove', function (e) {
+    isPointerOverCanvas = true
+    const rect = renderer.domElement.getBoundingClientRect()
+    mousePosition.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+    mousePosition.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+})
+
+//when the mouse leaves the canvas
+//set the isPointerOverCanvas to false
+//set the mousePosition to (2, 2)
+//set the sphere color to the default color
+renderer.domElement.addEventListener('mouseleave', function () {
+    isPointerOverCanvas = false
+    mousePosition.set(2, 2)
+    sphere.material.color.copy(sphereDefaultColor)
+})
+
+box2.name = 'box2'
+
+//create an instance of the raycaster class
+const raycaster = new THREE.Raycaster()
+
+const sphereId = sphere.id;
 
 function animate() {
     //make the box rotate
@@ -332,6 +370,35 @@ function animate() {
     spotLight.intensity = options.intensity
     //update the spotlight helper
     sLightHelper.update()
+
+    //set the two ends of the ray which are the camera and the normalized mouse
+    //position by calling the set from camera method from the raycaster
+    raycaster.setFromCamera(mousePosition, camera)
+
+    // variable that will hold an object that is returned by the intersect object's method 
+    // this object will contain any element from the scene that intersects with the ray
+    // const intersects = isPointerOverCanvas ? raycaster.intersectObjects([sphere, box2]) : []
+    const intersects = raycaster.intersectObjects(scene.children)
+
+    //if the pointer is over the canvas and the intersects array is not empty and 
+    // the id of the intersected object is the same as the sphere's id 
+    // then change the color of the sphere to red 
+    // otherwise change the color of the sphere to the default color
+    if (intersects.length > 0 && intersects[0].object.id === sphereId) {
+        sphere.material.color.set(0xff0000)
+    } else {
+        sphere.material.color.copy(sphereDefaultColor)
+    }
+
+    //if pointer is over the canvas and the intersects array is not empty and
+    // the id of the intersected object is the same as the box2's id
+    // then change the rotation of the box2
+    // otherwise change the rotation of the box2 to 0
+    if (intersects.length > 0 && intersects[0].object.name === 'box2') {
+        intersects[0].object.rotation.x += 0.01
+        intersects[0].object.rotation.y += 0.01
+    }
+
 
     //render the scene 
     renderer.render(scene, camera)
