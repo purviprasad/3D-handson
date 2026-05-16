@@ -251,6 +251,30 @@ box2.position.set(0, 15, 10)
 //so we can set the map for each material
 // box2.material.map = textureLoader.load(purple)
 
+
+const plane2Geometry = new THREE.PlaneGeometry(10, 10, 10, 10)
+const plane2Material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, wireframe: true, side: THREE.DoubleSide })
+const plane2 = new THREE.Mesh(plane2Geometry, plane2Material)
+scene.add(plane2)
+plane2.position.set(10, 10, 15)
+
+//get the position of the vertices
+// console.log(plane2.geometry.attributes.position.array)
+
+//change the position of the vertices
+//The plane has 11x11 = 121 vertices
+//Each vertex has 3 coordinates (x, y, z)
+//So the array has 121 * 3 = 363 elements
+plane2.geometry.attributes.position.array[0] -= 10 * Math.random()
+plane2.geometry.attributes.position.array[1] -= 10 * Math.random()
+plane2.geometry.attributes.position.array[2] -= 10 * Math.random()
+
+//get the last vertex
+const lastVertex = plane2.geometry.attributes.position.array.length - 1
+//set the z coordinate of the last vertex to 0
+plane2.geometry.attributes.position.array[lastVertex] -= 10 * Math.random()
+
+
 const gui = new dat.GUI()
 
 //define the options for the GUI
@@ -399,6 +423,12 @@ function animate() {
         intersects[0].object.rotation.y += 0.01
     }
 
+
+    plane2.geometry.attributes.position.array[0] = 10 * Math.random()
+    plane2.geometry.attributes.position.array[1] = 10 * Math.random()
+    plane2.geometry.attributes.position.array[2] = 10 * Math.random()
+    plane2.geometry.attributes.position.array[lastVertex] = 10 * Math.random()
+    plane2.geometry.attributes.position.needsUpdate = true
 
     //render the scene 
     renderer.render(scene, camera)
