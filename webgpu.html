@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- The title that appears on the browser tab -->
+    <title>Three.js WebGPU Room Demo</title>
+
+    <!-- Basic CSS to remove default browser margins and hide scrollbars -->
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* Prevents scrollbars from appearing */
+            background-color: #222;
+            /* Dark background before 3D loads */
+        }
+
+        /* Forces the 3D canvas to act as a block element */
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- We load our main Javascript file as a "module", which allows us to use 'import' statements -->
+    <script src="./src/webgpu.js" type="module"></script>
+</body>
+
+</html>
